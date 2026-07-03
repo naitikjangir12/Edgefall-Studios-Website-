@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="x-ua-compatible" content="ie=9">
+  <title>Edgefall Studios — Game Launcher</title>
+  <hta:application
+    id="EdgefallLauncher"
+    applicationname="Edgefall Launcher"
+    border="thin"
+    borderstyle="normal"
+    caption="yes"
+    icon=""
+    maximizebutton="yes"
+    minimizebutton="yes"
+    showintaskbar="yes"
+    singleinstance="yes"
+    sysmenu="yes"
+    windowstate="normal"
+    scroll="yes"
+  />
+  <style type="text/css">
+    * { margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #0D0D15;
+      color: #E8E8F0;
+      overflow-x: hidden;
+    }
+    
+    /* Login Screen */
+    #loginScreen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0D0D15;
+      z-index: 9999;
+    }
+    #loginBox {
+      width: 450px;
+      margin: 100px auto;
+      background: #13131F;
+      border: 2px solid #00F5FF;
+      padding: 40px;
+      text-align: center;
+    }
+    #loginBox h1 {
+      font-size: 32px;
+      color: #00F5FF;
+      margin-bottom: 10px;
+    }
+    #loginBox p {
+      color: #6B6B80;
+      font-size: 12px;
+      margin-bottom: 30px;
+      letter-spacing: 2px;
+    }
+    .input-field {
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: #0D0D15;
+      border: 2px solid #1F1F30;
+      color: #E8E8F0;
+      font-size: 14px;
+    }
+    .input-field:focus {
+      border-color: #00F5FF;
+      outline: none;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 15px;
+      background: #00F5FF;
+      border: none;
+      color: #0D0D15;
+      font-weight: bold;
+      font-size: 14px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .login-btn:hover {
+      background: #FF006E;
+    }
+    
+    /* Main Launcher */
+    #launcherMain {
+      display: none;
+      padding: 30px;
+    }
+    #launcherMain.active {
+      display: block;
+    }
+    
+    /* Header */
+    .header {
+      margin-bottom: 40px;
+      border-bottom: 2px solid #00F5FF;
+      padding-bottom: 20px;
+    }
+    .header h2 {
+      font-size: 28px;
+      color: #00F5FF;
+      display: inline-block;
+    }
+    .logout-btn {
+      float: right;
+      padding: 10px 20px;
+      background: #13131F;
+      border: 1px solid #FF006E;
+      color: #FF006E;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .logout-btn:hover {
+      background: #FF006E;
+      color: #0D0D15;
+    }
+    
+    /* Games Table */
+    .games-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 20px;
+    }
+    .game-cell {
+      width: 33%;
+      background: #13131F;
+      border: 2px solid #1F1F30;
+      vertical-align: top;
+    }
+    .game-cell:hover {
+      border-color: #00F5FF;
+    }
+    
+    .game-poster {
+      width: 100%;
+      height: 200px;
+      background: #0D0D15;
+      overflow: hidden;
+      position: relative;
+    }
+    .game-poster img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .game-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #0D0D15;
+      border: 1px solid #00F5FF;
+      color: #00F5FF;
+      padding: 5px 10px;
+      font-size: 10px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    
+    .game-info {
+      padding: 20px;
+    }
+    .game-title {
+      font-size: 22px;
+      color: #00F5FF;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    .game-desc {
+      color: #6B6B80;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      height: 60px;
+    }
+    .game-meta {
+      font-size: 11px;
+      color: #6B6B80;
+      margin-bottom: 15px;
+    }
+    .game-meta strong {
+      color: #E8E8F0;
+    }
+    
+    .play-btn {
+      width: 100%;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 13px;
+      letter-spacing: 1px;
+      border: none;
+      cursor: pointer;
+    }
+    .play-btn.active {
+      background: #00F5FF;
+      color: #0D0D15;
+    }
+    .play-btn.active:hover {
+      background: #FF006E;
+    }
+    .play-btn.disabled {
+      background: #1F1F30;
+      color: #6B6B80;
+      cursor: not-allowed;
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 1px solid #1F1F30;
+      color: #6B6B80;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen">
+    <div id="loginBox">
+      <h1>EDGEFALL STUDIOS</h1>
+      <p>GAME LAUNCHER</p>
+      <form id="loginForm" onsubmit="return doLogin()">
+        <input type="text" class="input-field" id="email" placeholder="EMAIL ADDRESS" />
+        <input type="password" class="input-field" id="password" placeholder="PASSWORD" />
+        <button type="submit" class="login-btn">LAUNCH GAMES</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN LAUNCHER -->
+  <div id="launcherMain">
+    <div class="header">
+      <h2>Welcome Back, Player</h2>
+      <button class="logout-btn" onclick="doLogout()">LOGOUT</button>
+      <div style="clear: both;"></div>
+    </div>
+
+    <table class="games-table">
+      <tr>
+        <!-- Game 1 -->
+        <td class="game-cell">
+          <div class="game-poster">
+            <div class="game-badge">FLAGSHIP</div>
+            <img src="Assets/riftwood.jpg" alt="Echoes of Riftwood">
+          </div>
+          <div class="game-info">
+            <div class="game-title">Echoes of Riftwood</div>
+            <div class="game-desc">Cozy fantasy adventure. Explore, quest, battle monsters, and become the village hero.</div>
+            <div class="game-meta">
+              <strong>Genre:</strong> 3D Adventure<br>
+              <strong>Engine:</strong> Unity<br>
+              <strong>Status:</strong> Beta
+            </div>
+            <button class="play-btn active" onclick="playGame('Echoes of Riftwood')">PLAY IT NOW</button>
+          </div>
+        </td>
+
+        <!-- Game 2 -->
+        <td class="game-cell">
+          <div class="game-poster">
+            <div class="game-badge">PAUSED</div>
+            <img src="Assets/dumbfools.jpg" alt="Dumb Fools">
+          </div>
+          <div class="game-info">
+            <div class="game-title">Dumb Fools</div>
+            <div class="game-desc">Chaotic multiplayer party game. No rules — just pure fun and madness!</div>
+            <div class="game-meta">
+              <strong>Genre:</strong> Party Multiplayer<br>
+              <strong>Players:</strong> 2-8 Online<br>
+              <strong>Status:</strong> Paused
+            </div>
+            <button class="play-btn disabled" disabled>DEVELOPMENT PAUSED</button>
+          </div>
+        </td>
+
+        <!-- Game 3 -->
+        <td class="game-cell">
+          <div class="game-poster">
+            <div class="game-badge">ANNOUNCED</div>
+            <img src="Assets/1000263870.png" alt="Project Mantra">
+          </div>
+          <div class="game-info">
+            <div class="game-title">Project Mantra</div>
+            <div class="game-desc">Next-gen action RPG in Unreal Engine 5. Combat and visuals redefined.</div>
+            <div class="game-meta">
+              <strong>Engine:</strong> Unreal Engine 5<br>
+              <strong>Genre:</strong> Action RPG<br>
+              <strong>Release:</strong> 2027
+            </div>
+            <button class="play-btn disabled" disabled>COMING 2027</button>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <div class="footer">
+      © 2026 Edgefall Studios — Founded 12 Sept 2024
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    // HTA Compatible JS - ES5 Only, No Arrow Functions
+    
+    function doLogin() {
+      var email = document.getElementById('email').value;
+      var password = document.getElementById('password').value;
+      
+      if (email == '' || password == '') {
+        alert('Please enter email and password');
+        return false;
+      }
+      
+      // Hide login, show launcher
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('launcherMain').className = 'active';
+      return false;
+    }
+    
+    function doLogout() {
+      document.getElementById('launcherMain').className = '';
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+    }
+    
+    function playGame(gameName) {
+      alert('Launching ' + gameName + '!\n\n[Demo Mode]\n\nIn production: Launch game executable here.');
+    }
+  </script>
+
+</body>
+</html>
